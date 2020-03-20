@@ -648,8 +648,11 @@ export default class TextField extends PureComponent {
       errorColor,
       containerStyle,
       inputContainerStyle: inputContainerStyleOverrides,
-    } = this.props;
 
+      lineBaseColor,
+      lineTintColor,
+      lineErrorColor,
+    } = this.props;
     let restricted = this.isRestricted();
     let contentInset = this.contentInset();
 
@@ -700,6 +703,9 @@ export default class TextField extends PureComponent {
 
       lineType,
       disabledLineType,
+      baseColor:lineBaseColor || baseColor,
+      tintColor:lineTintColor || tintColor,
+      errorColor:lineErrorColor || errorColor,
     };
 
     return (

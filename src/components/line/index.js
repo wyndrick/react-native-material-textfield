@@ -65,7 +65,6 @@ export default class Line extends PureComponent {
       errorColor,
       focusAnimation,
     } = this.props;
-
     if (disabled) {
       return {
         borderColor: baseColor,

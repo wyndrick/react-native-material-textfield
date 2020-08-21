@@ -159,8 +159,10 @@ export default class TextField extends PureComponent {
     this.onContentSizeChange = this.onContentSizeChange.bind(this);
     this.onFocusAnimationEnd = this.onFocusAnimationEnd.bind(this);
 
+    console.log("contentInset beforeGetter", props.contentInset)
     this.createGetter('contentInset');
     this.createGetter('labelOffset');
+    console.log("contentInset afterGetter", this.contentInset())
 
     this.inputRef = React.createRef();
     this.mounted = false;
@@ -441,6 +443,7 @@ export default class TextField extends PureComponent {
     if ('web' === Platform.OS && multiline) {
       return 'auto';
     }
+    console.log("content Inset = ", contentInset)
 
     return contentInset.top
       + labelFontSize
@@ -648,7 +651,8 @@ export default class TextField extends PureComponent {
       errorColor,
       containerStyle,
       inputContainerStyle: inputContainerStyleOverrides,
-
+      inputContainerErrorStyle,
+      inputContainerFocusStyle,
       lineBaseColor,
       lineTintColor,
       lineErrorColor,
@@ -674,12 +678,48 @@ export default class TextField extends PureComponent {
     };
 
     let inputContainerProps = {
-      style: [
-        this.constructor.inputContainerStyle,
-        inputContainerStyle,
-        inputContainerStyleOverrides,
-      ],
+      style: {
+        ...this.constructor.inputContainerStyle,
+        ...inputContainerStyle,
+        ...inputContainerStyleOverrides,
+      },
     };
+    if (inputContainerStyleOverrides !== undefined && inputContainerStyleOverrides.hasOwnProperty(("borderWidth"))) {
+      const borderDefaultWidth = inputContainerStyleOverrides.borderWidth;
+      const borderErrorWidth = (inputContainerErrorStyle?.borderWidth ? inputContainerErrorStyle?.borderWidth:  borderDefaultWidth);
+      const borderTintWidth = (inputContainerFocusStyle?.borderWidth ? inputContainerFocusStyle?.borderWidth: borderDefaultWidth);
+      let borderWidth = disabled?
+      borderDefaultColor:
+      restricted?
+      borderErrorWidth:
+        focusAnimation.interpolate({
+          inputRange: [-1, 0, 1],
+          outputRange: [
+            borderErrorWidth, 
+            borderDefaultWidth, 
+            borderTintWidth],
+        });
+      inputContainerProps.style.borderWidth = borderWidth
+    }
+    
+    if (inputContainerStyleOverrides !== undefined && inputContainerStyleOverrides.hasOwnProperty(("borderColor"))) {
+      const borderDefaultColor = inputContainerStyleOverrides.borderColor;
+      const borderErrorColor = (inputContainerErrorStyle?.borderColor ? inputContainerErrorStyle?.borderColor:  borderDefaultColor);
+      const borderTintColor = (inputContainerFocusStyle?.borderColor ? inputContainerFocusStyle?.borderColor: borderDefaultColor);
+      let borderColor = disabled?
+      borderDefaultColor:
+      restricted?
+        errorColor:
+        focusAnimation.interpolate({
+          inputRange: [-1, 0, 1],
+          outputRange: [
+            borderErrorColor, 
+            borderDefaultColor, 
+            borderTintColor],
+        });
+      
+      inputContainerProps.style.borderColor =  borderColor
+    }
 
     let styleProps = {
       disabled,
@@ -707,10 +747,18 @@ export default class TextField extends PureComponent {
       tintColor:lineTintColor || tintColor,
       errorColor:lineErrorColor || errorColor,
     };
-
+    const borderStyle = {
+      borderWidth:inputContainerProps.style.borderWidth, 
+      borderColor:inputContainerProps.style.borderColor, 
+      borderRadius:inputContainerProps.style.borderRadius
+    }
+    delete inputContainerProps.style.borderColor
+    delete inputContainerProps.style.borderWidth
+    delete inputContainerProps.style.borderRadius
     return (
       <View {...containerProps}>
         <Animated.View {...inputContainerProps}>
+        <Animated.View style={{...borderStyle, position:"absolute", left:0, top:0, bottom:0, right:0}} />
           {this.renderLine(lineProps)}
           {this.renderAccessory('renderLeftAccessory')}
 

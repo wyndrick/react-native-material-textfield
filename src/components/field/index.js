@@ -159,10 +159,8 @@ export default class TextField extends PureComponent {
     this.onContentSizeChange = this.onContentSizeChange.bind(this);
     this.onFocusAnimationEnd = this.onFocusAnimationEnd.bind(this);
 
-    console.log("contentInset beforeGetter", props.contentInset)
     this.createGetter('contentInset');
     this.createGetter('labelOffset');
-    console.log("contentInset afterGetter", this.contentInset())
 
     this.inputRef = React.createRef();
     this.mounted = false;
@@ -443,7 +441,6 @@ export default class TextField extends PureComponent {
     if ('web' === Platform.OS && multiline) {
       return 'auto';
     }
-    console.log("content Inset = ", contentInset)
 
     return contentInset.top
       + labelFontSize

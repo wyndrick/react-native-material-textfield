@@ -380,7 +380,6 @@ export default class TextField extends PureComponent {
 
   onChange(event) {
     let { onChange } = this.props;
-
     if ('function' === typeof onChange) {
       onChange(event);
     }
@@ -390,11 +389,15 @@ export default class TextField extends PureComponent {
     let { onChangeText, formatText } = this.props;
 
     if ('function' === typeof formatText) {
-      text = formatText(text);
+      Promise.resolve(formatText(text)).then((value) => {
+        text = value;
+        this.setState({ text });
+        if ('function' === typeof onChangeText) {
+          onChangeText(text);
+        }
+      })
     }
-
     this.setState({ text });
-
     if ('function' === typeof onChangeText) {
       onChangeText(text);
     }
